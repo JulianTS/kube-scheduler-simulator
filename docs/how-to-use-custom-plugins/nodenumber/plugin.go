@@ -2,7 +2,11 @@ package nodenumber
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"log"
+	"net/http"
 	"strconv"
 
 	"golang.org/x/xerrors"
@@ -47,7 +51,7 @@ func (pl *NodeNumber) Name() string {
 
 // preScoreState computed at PreScore and used at Score.
 type preScoreState struct {
-	podSuffixNumber int
+	podSuffixNumber float64
 }
 
 // Clone implements the mandatory Clone interface. We don't really copy the data since
@@ -57,7 +61,7 @@ func (s *preScoreState) Clone() framework.StateData {
 }
 
 func (pl *NodeNumber) PreScore(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodes []*v1.Node) *framework.Status {
-	podNameLastChar := pod.Name[len(pod.Name)-1:]
+	/*podNameLastChar := pod.Name[len(pod.Name)-1:]
 	podnum, err := strconv.Atoi(podNameLastChar)
 	if err != nil {
 		// return success even if its suffix is non-number.
@@ -68,6 +72,9 @@ func (pl *NodeNumber) PreScore(ctx context.Context, state *framework.CycleState,
 		podSuffixNumber: podnum,
 	}
 	state.Write(preScoreStateKey, s)
+
+	return nil
+	*/
 
 	return nil
 }
@@ -82,39 +89,44 @@ var ErrNotExpectedPreScoreState = errors.New("unexpected pre score state")
 
 // Score invoked at the score extension point.
 func (pl *NodeNumber) Score(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (int64, *framework.Status) {
-	data, err := state.Read(preScoreStateKey)
-	if err != nil {
-		err = xerrors.Errorf("fetch pre score state: %w", err)
-		return 0, framework.AsStatus(err)
+
+	var result float64 = 0
+
+	name := nodeName
+
+	switch name {
+	case "berlin":
+		result = getSolData("berlin")
+	case "mexico":
+		result = getSolData("mexicocity")
+	case "kapstadt":
+		result = getSolData("capetown")
 	}
 
-	s, ok := data.(*preScoreState)
-	if !ok {
-		err = xerrors.Errorf("fetched pre score state is not *preScoreState, but %T, %w", data, ErrNotExpectedPreScoreState)
-		return 0, framework.AsStatus(err)
-	}
+	/*	nodeNameLastChar := nodeName[len(nodeName)-1:]
 
-	nodeNameLastChar := nodeName[len(nodeName)-1:]
+		nodenum, err := strconv.Atoi(nodeNameLastChar)
+		if err != nil {
+			// return success even if its suffix is non-number.
+			return 0, nil
+		}
 
-	nodenum, err := strconv.Atoi(nodeNameLastChar)
-	if err != nil {
-		// return success even if its suffix is non-number.
-		return 0, nil
-	}
+		var matchScore int64 = 10
+		var nonMatchScore int64 = 0 //nolint:revive // for better readability.
+		if pl.reverse {
+			matchScore = 0
+			nonMatchScore = 10
+		}
 
-	var matchScore int64 = 10
-	var nonMatchScore int64 = 0 //nolint:revive // for better readability.
-	if pl.reverse {
-		matchScore = 0
-		nonMatchScore = 10
-	}
+		if s.podSuffixNumber == nodenum {
+			// if match, node get high score.
+			return matchScore, nil
+		}
 
-	if s.podSuffixNumber == nodenum {
-		// if match, node get high score.
-		return matchScore, nil
-	}
+		return nonMatchScore, nil
+	*/
 
-	return nonMatchScore, nil
+	return int64(result * 100), nil
 }
 
 // ScoreExtensions of the Score plugin.
@@ -141,4 +153,36 @@ type NodeNumberArgs struct {
 	metav1.TypeMeta
 
 	Reverse bool `json:"reverse"`
+}
+
+type resultType struct {
+	Result string `json:"result"`
+}
+
+func getSolData(city string) float64 {
+
+	url := "http://host.docker.internal:4001/availability/?city=" + city
+
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result := resultType{}
+	jsonErr := json.Unmarshal(body, &result)
+	if jsonErr != nil {
+		log.Fatal(jsonErr)
+	}
+
+	if s, err := strconv.ParseFloat(result.Result, 64); err == nil {
+		return s
+	}
+	return 0
 }

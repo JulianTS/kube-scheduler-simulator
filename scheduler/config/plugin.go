@@ -5,6 +5,8 @@ import (
 	"k8s.io/kube-scheduler/config/v1beta2"
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins"
 	"k8s.io/kubernetes/pkg/scheduler/framework/runtime"
+
+	"github.com/kubernetes-sigs/kube-scheduler-simulator/docs/how-to-use-custom-plugins/nodenumber"
 )
 
 // RegisteredFilterPlugins returns all registered plugins.
@@ -55,7 +57,10 @@ func InTreeScorePluginSet() (v1beta2.PluginSet, error) {
 
 func OutOfTreeScorePlugins() []v1beta2.Plugin {
 	return []v1beta2.Plugin{
-		// Note: add your score plugins here.
+		// Note: add your original score plugins here.
+		{
+			Name: nodenumber.Name,
+		},
 	}
 }
 
@@ -65,6 +70,7 @@ func InTreeRegistries() runtime.Registry {
 
 func OutOfTreeRegistries() runtime.Registry {
 	return runtime.Registry{
-		// Note: add your plugins registries here.
+		// Note: add your original score plugins registries here.
+		nodenumber.Name: nodenumber.New,
 	}
 }
