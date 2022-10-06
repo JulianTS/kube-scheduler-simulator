@@ -94,12 +94,13 @@ func (pl *NodeNumber) Score(ctx context.Context, state *framework.CycleState, po
 
 	name := nodeName
 
+	//to ensure nodes with different names don't get a score
 	switch name {
 	case "berlin":
 		result = getSolData("berlin")
-	case "mexico":
+	case "mexicocity":
 		result = getSolData("mexicocity")
-	case "kapstadt":
+	case "capetown":
 		result = getSolData("capetown")
 	}
 
