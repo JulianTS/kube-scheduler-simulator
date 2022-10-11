@@ -1,5 +1,5 @@
 # Kube-Scheduler-Simulator-BA
-Bachelor Project: This code is derived from the Kube-Scheduler-Simulator Repository of the Kubernetes Special Interest Group. 
+Bachelor Project: This code is derived from the Kube-Scheduler-Simulator repository of the Kubernetes Special Interest Group. 
 
 In order to extend the scheduler with renewable awareness the NodeNumber example plugin has been rewritten as adding and debugging a new plugin successfully afforded a deeper unterstanding on developing Kubernetes components. 
 
