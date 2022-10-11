@@ -1,3 +1,28 @@
+# Kube-Scheduler-Simulator-BA
+Bachelor Project: This code is derived from the Kube-Scheduler-Simulator Repository of the Kubernetes Special Interest Group. 
+
+In order to extend the scheduler with renewable awareness the NodeNumber example plugin has been rewritten as adding and debugging a new plugin successfully afforded a deeper unterstanding on developing Kubernetes components. 
+
+The simulation has been conducted with the simulator running in Docker. Other options have not been tested.
+
+Files that have been changed are the following: 
+
+``docs/how-to-use-custom-plugins/nodenumber/plugin.go``
+
+``scheduler/config/plugin.go``
+
+
+
+### Build and run Simulator
+
+Run 
+```bash
+make docker_build_and_up
+```
+
+Note: An unknown error might occur occasionally during building process.
+
+
 # Web-based Kubernetes scheduler simulator
 
 Hello world. Here is web-based Kubernetes scheduler simulator.
