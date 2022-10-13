@@ -20,7 +20,14 @@ Run
 make docker_build_and_up
 ```
 
-Note: An unknown error might occur occasionally during building process.
+Note:  An unknown error might occur occasionally during building process.
+
+## Setup for Simulation
+
+Use the Web UI on http://localhost:3000 to create three nodes with the name `berlin` , `capetown` and `mexicocity`. 
+
+The prop `generateName` has to be changed to name `name` for this.
+
 
 
 # Web-based Kubernetes scheduler simulator
